@@ -35,7 +35,7 @@ public class TokenController {
     @ResponseBody
     public List<String> getTokens() {
         List<String> tokenValues = new ArrayList<String>();
-        Collection<OAuth2AccessToken> tokens = tokenStore.findTokensByClientId("sampleClientId");
+        Collection<OAuth2AccessToken> tokens = tokenStore.findTokensByClientId("fooClientIdPassword");
         if (tokens != null) {
             for (OAuth2AccessToken token : tokens) {
                 tokenValues.add(token.getValue());

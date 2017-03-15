@@ -31,7 +31,7 @@ app.controller('mainCtrl', function($scope,$resource,$http,$httpParamSerializer,
         $scope.foo = $scope.foos.get({fooId:$scope.foo.id});
     }
     
-    $scope.loginData = {grant_type:"password", username: "", password: "", client_id: "fooClientIdPassword"};
+    $scope.loginData = {grant_type:"password", username: "john", password: "123", client_id: "fooClientIdPassword"};
     $scope.refreshData = {grant_type:"refresh_token"};
         
     var isLoginPage = window.location.href.indexOf("login") != -1;
@@ -72,11 +72,34 @@ app.controller('mainCtrl', function($scope,$resource,$http,$httpParamSerializer,
                 window.location.href="index";
             },function(){
                 console.log("error");
+                <!--$cookies.remove("access_token" );-->
                 window.location.href = "login";
             }
         );
     }
-    
+
+    $scope.logout = function() {
+         logOut($scope.loginData);
+    }
+
+    function logOut(params){
+        var req = {
+            method: 'POST',
+            url: "oauth/logout",
+            headers: {"Content-type": "application/x-www-form-urlencoded; charset=utf-8"},
+            data: $httpParamSerializer(params)
+        }
+        $http(req).then(
+            function(data){
+                $cookies.remove("access_token" );
+                window.location.href="login";
+            },function(){
+                console.log("error");
+                window.location.href = "index";
+            }
+        );
+    }
+
     function getOrganization(){
     	var token = $cookies.get("access_token");
     	//JWT
@@ -91,7 +114,7 @@ app.controller('mainCtrl', function($scope,$resource,$http,$httpParamSerializer,
             $scope.organization = response.data.organization;
         }); 
     }
-    
+
 });
 /*]]>*/
 </script>
