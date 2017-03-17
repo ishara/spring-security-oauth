@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
+//@PreAuthorize( "isAuthenticated()" )
 public class FooController {
 
     public FooController() {
@@ -30,7 +31,7 @@ public class FooController {
     }
 
     // API - write
-    @PreAuthorize("#oauth2.hasScope('foo') and #oauth2.hasScope('write')")
+//    @PreAuthorize("#oauth2.hasScope('foo') and #oauth2.hasScope('write')")
     @RequestMapping(method = RequestMethod.POST, value = "/foos")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody

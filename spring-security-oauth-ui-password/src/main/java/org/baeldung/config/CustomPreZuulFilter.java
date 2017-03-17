@@ -28,6 +28,7 @@ public class CustomPreZuulFilter extends ZuulFilter {
         try {
             encoded = Base64.encode("fooClientIdPassword:secret".getBytes("UTF-8"));
             ctx.addZuulRequestHeader("Authorization", "Basic " + new String(encoded));
+//            ctx.addZuulRequestHeader("Authorization", "Bearer " + new String(encoded));
             logger.info("pre filter");
             logger.info(ctx.getRequest().getHeader("Authorization"));
 
@@ -65,6 +66,11 @@ public class CustomPreZuulFilter extends ZuulFilter {
 
     @Override
     public boolean shouldFilter() {
+        String requestUrl = RequestContext.getCurrentContext().getRequest().getRequestURI();
+        if( requestUrl.startsWith( "/api" ) )
+        {
+            return false;
+        }
         return true;
     }
 

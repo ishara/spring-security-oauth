@@ -1,7 +1,16 @@
 server:
     port: 8084
 zuul:
+  ignoredServices: '*'
   routes:
     oauth:
       path: /oauth/**
       url: http://localhost:8081/spring-security-oauth-server/oauth
+    api:
+      path: /api/**
+      sensitiveHeaders:
+      url: http://localhost:8082/spring-security-oauth-resource
+logging:
+  level:
+    ROOT: INFO
+    org.springframework.web: DEBUG
