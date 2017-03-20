@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
@@ -18,10 +19,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     public void globalUserDetails(final AuthenticationManagerBuilder auth) throws Exception {
         // @formatter:off
-		auth.inMemoryAuthentication().withUser("john").password("123").roles("USER").and().withUser("tom")
-				.password("111").roles("ADMIN");
-		// @formatter:on
+//		auth.inMemoryAuthentication().withUser("john").password("123").roles("USER").and().withUser("tom")
+//				.password("111").roles("ADMIN");
+        auth.authenticationProvider( customAuthenticationProvider() );
+        // @formatter:on
         //todo add customAuthenticationProvider
+    }
+    @Bean
+    AuthenticationProvider customAuthenticationProvider() {
+        CustomAuthenticationProvider impl = new CustomAuthenticationProvider();
+        return impl ;
     }
 
     @Override
@@ -37,7 +44,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/login").permitAll().anyRequest().authenticated().and().formLogin()
 				.permitAll();
         http.authorizeRequests().antMatchers( "/oauth/revoke-token" ).permitAll().anyRequest().anonymous();
-        http.csrf().disable();
+//        http.csrf().disable();
 //        http.csrf().csrfTokenRepository( CookieCsrfTokenRepository.withHttpOnlyFalse());
         // @formatter:on
     }
