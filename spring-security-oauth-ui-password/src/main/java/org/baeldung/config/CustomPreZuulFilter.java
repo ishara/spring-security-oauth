@@ -1,62 +1,71 @@
 package org.baeldung.config;
 
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-
+import com.netflix.zuul.ZuulFilter;
+import com.netflix.zuul.context.RequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.stereotype.Component;
 
-import com.netflix.zuul.ZuulFilter;
-import com.netflix.zuul.context.RequestContext;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
-public class CustomPreZuulFilter extends ZuulFilter {
+public class CustomPreZuulFilter extends ZuulFilter
+{
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger( this.getClass() );
 
     @Override
-    public Object run() {
+    public Object run()
+    {
         final RequestContext ctx = RequestContext.getCurrentContext();
-        logger.info("in zuul filter " + ctx.getRequest().getRequestURI());
+        logger.info( "in zuul filter " + ctx.getRequest().getRequestURI() );
         byte[] encoded;
-        try {
-            encoded = Base64.encode("fooClientIdPassword:secret".getBytes("UTF-8"));
-            ctx.addZuulRequestHeader("Authorization", "Basic " + new String(encoded));
-//            ctx.addZuulRequestHeader("Authorization", "Bearer " + new String(encoded));
-            logger.info("pre filter");
-            logger.info(ctx.getRequest().getHeader("Authorization"));
+        try
+        {
+            encoded = Base64.encode( "fooClientIdPassword:secret".getBytes( "UTF-8" ) );
+            ctx.addZuulRequestHeader( "Authorization", "Basic " + new String( encoded ) );
+            logger.info( "pre filter" );
+            logger.info( ctx.getRequest().getHeader( "Authorization" ) );
 
             final HttpServletRequest req = ctx.getRequest();
 
-            final String refreshToken = extractRefreshToken(req);
-            if (refreshToken != null) {
+            String refreshToken = null;
+            if( !req.getRequestURI().startsWith( "/oauth/token" ) )
+            {
+                refreshToken = extractRefreshToken( req );
+            }
+            if( refreshToken != null )
+            {
                 final Map<String, String[]> param = new HashMap<String, String[]>();
-                param.put("refresh_token", new String[] { refreshToken });
-                param.put("grant_type", new String[] { "refresh_token" });
+                param.put( "refresh_token", new String[]{refreshToken} );
+                param.put( "grant_type", new String[]{"refresh_token"} );
 
-                ctx.setRequest(new CustomHttpServletRequest(req, param));
+                ctx.setRequest( new CustomHttpServletRequest( req, param ) );
             }
 
-        } catch (final UnsupportedEncodingException e) {
-            logger.error("Error occured in pre filter", e);
         }
-
-        //
+        catch( final UnsupportedEncodingException e )
+        {
+            logger.error( "Error occured in pre filter", e );
+        }
 
         return null;
     }
 
-    private String extractRefreshToken(HttpServletRequest req) {
+    private String extractRefreshToken( HttpServletRequest req )
+    {
         final Cookie[] cookies = req.getCookies();
-        if (cookies != null) {
-            for (int i = 0; i < cookies.length; i++) {
-                if (cookies[i].getName().equalsIgnoreCase("refreshToken")) {
+        if( cookies != null )
+        {
+            for( int i = 0; i < cookies.length; i++ )
+            {
+                if( cookies[i].getName().equalsIgnoreCase( "refreshToken" ) )
+                {
                     return cookies[i].getValue();
                 }
             }
@@ -65,22 +74,25 @@ public class CustomPreZuulFilter extends ZuulFilter {
     }
 
     @Override
-    public boolean shouldFilter() {
+    public boolean shouldFilter()
+    {
         String requestUrl = RequestContext.getCurrentContext().getRequest().getRequestURI();
-        if( requestUrl.startsWith( "/api" ) )
+        if( requestUrl.startsWith( "/oauth/token" ) )
         {
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     @Override
-    public int filterOrder() {
+    public int filterOrder()
+    {
         return -2;
     }
 
     @Override
-    public String filterType() {
+    public String filterType()
+    {
         return "pre";
     }
 

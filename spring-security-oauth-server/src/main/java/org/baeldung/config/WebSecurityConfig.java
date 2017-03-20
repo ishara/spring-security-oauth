@@ -35,8 +35,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         // @formatter:off
 		http.authorizeRequests()
                 .antMatchers("/login").permitAll().anyRequest().authenticated().and().formLogin()
-                .and().logout().logoutSuccessUrl( "/login" ).permitAll()
 				.permitAll();
+        http.authorizeRequests().antMatchers( "/oauth/revoke-token" ).permitAll().anyRequest().anonymous();
         http.csrf().disable();
 //        http.csrf().csrfTokenRepository( CookieCsrfTokenRepository.withHttpOnlyFalse());
         // @formatter:on

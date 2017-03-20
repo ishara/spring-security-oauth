@@ -5,6 +5,7 @@ zuul:
   routes:
     oauth:
       path: /oauth/**
+      sensitiveHeaders:
       url: http://localhost:8081/spring-security-oauth-server/oauth
     api:
       path: /api/**
