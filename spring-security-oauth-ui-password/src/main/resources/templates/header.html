@@ -25,6 +25,7 @@ var app = angular.module('myApp', ["ngResource","ngRoute","ngCookies","angular-j
 app.controller('mainCtrl', function($scope,$resource,$http,$httpParamSerializer,$cookies,jwtHelper) {
     $scope.foo = {id:1 , name:"sample foo"};
     $scope.foos = $resource("api/foos/:fooId",{fooId:'@id'});
+    $scope.logout = $resource("oauth/revoke-token");
     <!--$scope.foos = $resource("http://localhost:8082/spring-security-oauth-resource/foos/:fooId",{fooId:'@id'});-->
 
     
@@ -53,6 +54,7 @@ app.controller('mainCtrl', function($scope,$resource,$http,$httpParamSerializer,
     }
 
     $scope.login = function() {
+         $cookies.remove("refreshToken" );
          obtainAccessToken($scope.loginData);
     }
 
@@ -81,27 +83,12 @@ app.controller('mainCtrl', function($scope,$resource,$http,$httpParamSerializer,
         );
     }
 
-    $scope.logout = function() {
-         logOut($scope.loginData);
-    }
+    $scope.logouts = function() {
+         $http.defaults.headers.common.Authorization= 'Bearer ' + $cookies.get("access_token");
+         $scope.log = $scope.logout.get();
+         $cookies.remove("access_token" );
 
-    function logOut(params){
-    $cookies.remove("access_token" );
-        <!--var req = {-->
-            <!--method: 'POST',-->
-            <!--url: "oauth/logout",-->
-            <!--headers: {"Content-type": "application/x-www-form-urlencoded; charset=utf-8"},-->
-            <!--data: $httpParamSerializer(params)-->
-        <!--}-->
-        <!--$http(req).then(-->
-            <!--function(data){-->
-                <!--&lt;!&ndash;$cookies.remove("access_token" );&ndash;&gt;-->
-                <!--window.location.href="login";-->
-            <!--},function(){-->
-                <!--console.log("error");-->
-                <!--window.location.href = "index";-->
-            <!--}-->
-        <!--);-->
+         window.location.href = "login";
     }
 
     function getOrganization(){
@@ -112,11 +99,11 @@ app.controller('mainCtrl', function($scope,$resource,$http,$httpParamSerializer,
     	$scope.organization = payload.organization; */
 
     	//JDBC
-    	 <!--$http.get("api/users/extra")-->
-        <!--.then(function(response) {-->
-        	<!--console.log(response);-->
-            <!--$scope.organization = response.data.organization;-->
-        <!--});-->
+    	 $http.get("api/users/extra")
+        .then(function(response) {
+        	console.log(response);
+            $scope.organization = response.data.organization;
+        });
     }
 
 });
